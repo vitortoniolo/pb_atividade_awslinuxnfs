@@ -7,20 +7,20 @@ Este trabalho tem como objetivo a criação de uma instância AWS Linux com um s
 16 GB SSD)
 - Elastic IP anexado à instância
 - Liberar seguintes portas de comunicação para acesso público:
- - 22/TCP
- - 111/TCP e UDP
- - 2049/TCP e UDP
- - 80/TCP 
- - 443/TCP
+  - 22/TCP
+  - 111/TCP e UDP
+  - 2049/TCP e UDP
+  - 80/TCP 
+  - 443/TCP
 
 #### Requisitos Linux
 - Configurar o NFS entregue
 - Criar um diretorio dentro do filesystem do NFS
 - Inicializar o apache
 - Criar um script que deve ser executado automaticamente a cada 5 minutos
- - O script deve conter - Data/HORA + nome do serviço + Status + mensagem
+  - O script deve conter - Data/HORA + nome do serviço + Status + mensagem
 personalizada de ONLINE ou offline
- - O script deve gerar 2 arquivos de saida: 1 para o serviço online e 1 para o serviço
+  - O script deve gerar 2 arquivos de saida: 1 para o serviço online e 1 para o serviço
 OFFLINE
 
 ## Instruções passo-a-passo
@@ -32,7 +32,13 @@ OFFLINE
 5. O download de sua chave iniciará automaticamente, tenha certeza de salva-lá em um lugar seguro
 
 #### Criação do security group
-WIP
+1. No Dashboard EC2, entre na aba "Security Groups"
+2. Clique em "Create Security Group"
+3. Nomeie e edite a descrição caso necessário
+4. Em "Inbound rules", edite conforme a imagem:
+![Inbound rules](https://github.com/vitortoniolo/pb_atividade_awslinuxnfs/assets/133904035/777c3b91-d561-4506-87a7-bd4e9c4a5750)
+
+
 #### Criação da Instância
 1. No Dashboard EC2, entre na aba "Instances"
 2. Clique em "Launch Instances"
@@ -50,3 +56,4 @@ WIP
 3. Clique em Allocate
 4. Selecione o IP,  clique em "Actions" e em "Associate Elastic IP"
 5. Seleciona a instância previamente criada
+
