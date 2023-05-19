@@ -57,3 +57,11 @@ OFFLINE
 4. Selecione o IP,  clique em "Actions" e em "Associate Elastic IP"
 5. Seleciona a instância previamente criada
 
+#### Linux (very wip)
+1. clique connect na instancia ec2
+2. ao abrir o terminal, digite "sudo yum update"
+3. use o comando sudo mkdir nfs/<seunome> para criar o diretorio nfs
+4. use o comando sudo nano /etc/exports (alternativamente pode usar vim invés de nano, por simplicidade irei usar nano) 
+5. adicione a seguinte linha ao arquivo: /nfs/<seunome> <ipdamaquina>(rw,sync,no_root_squash,no_all_squash) 
+
+ 
