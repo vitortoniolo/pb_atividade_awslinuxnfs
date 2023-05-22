@@ -7,20 +7,20 @@ Este trabalho tem como objetivo a criação de uma instância AWS Linux com um s
 16 GB SSD)
 - Elastic IP anexado à instância
 - Liberar seguintes portas de comunicação para acesso público:
-  - 22/TCP
-  - 111/TCP e UDP
-  - 2049/TCP e UDP
-  - 80/TCP 
-  - 443/TCP
+ - 22/TCP
+ - 111/TCP e UDP
+ - 2049/TCP e UDP
+ - 80/TCP 
+ - 443/TCP
 
 #### Requisitos Linux
 - Configurar o NFS entregue
 - Criar um diretorio dentro do filesystem do NFS
 - Inicializar o apache
 - Criar um script que deve ser executado automaticamente a cada 5 minutos
-  - O script deve conter - Data/HORA + nome do serviço + Status + mensagem
+ - O script deve conter - Data/HORA + nome do serviço + Status + mensagem
 personalizada de ONLINE ou offline
-  - O script deve gerar 2 arquivos de saida: 1 para o serviço online e 1 para o serviço
+ - O script deve gerar 2 arquivos de saida: 1 para o serviço online e 1 para o serviço
 OFFLINE
 
 ## Instruções passo-a-passo
@@ -32,13 +32,7 @@ OFFLINE
 5. O download de sua chave iniciará automaticamente, tenha certeza de salva-lá em um lugar seguro
 
 #### Criação do security group
-1. No Dashboard EC2, entre na aba "Security Groups"
-2. Clique em "Create Security Group"
-3. Nomeie e edite a descrição caso necessário
-4. Em "Inbound rules", edite conforme a imagem:
-![Inbound rules](https://github.com/vitortoniolo/pb_atividade_awslinuxnfs/assets/133904035/777c3b91-d561-4506-87a7-bd4e9c4a5750)
-
-
+WIP
 #### Criação da Instância
 1. No Dashboard EC2, entre na aba "Instances"
 2. Clique em "Launch Instances"
@@ -57,11 +51,46 @@ OFFLINE
 4. Selecione o IP,  clique em "Actions" e em "Associate Elastic IP"
 5. Seleciona a instância previamente criada
 
-#### Linux (very wip)
-1. clique connect na instancia ec2
-2. ao abrir o terminal, digite "sudo yum update"
-3. use o comando sudo mkdir nfs/<seunome> para criar o diretorio nfs
-4. use o comando sudo nano /etc/exports (alternativamente pode usar vim invés de nano, por simplicidade irei usar nano) 
-5. adicione a seguinte linha ao arquivo: /nfs/<seunome> <ipdamaquina>(rw,sync,no_root_squash,no_all_squash) 
+#### NFS 
+1. Clique connect na instancia ec2
+2. Ao abrir o terminal, digite "sudo yum update"
+3. Use o comando "sudo mkdir nfs/<seunome>" para criar o diretorio nfs
+4. Agora digite "sudo nano /etc/exports" (alternativamente pode usar vim invés de nano, por simplicidade irei usar nano) 
+5. Adicione a seguinte linha ao arquivo: /nfs/<seunome> <ipdamaquina>(rw)
+6. Para inicializar o serviço NFS digite "sudo systemctl start nfs-server"
+7. Para inizializa-lo automaticamente com o sistema digite "sudo systemctl enable nfs-server"
 
- 
+#### Apache
+1. No CMD digite "sudo yum install httpd" para instalar o serviço apache
+2. Após isso digie "sudo systemctl start httpd" para inicializa-lo
+3. Para fazer o apache inicializar automaticamente, digite "sudo systemctl enable httpd"
+
+#### Script
+1. Digite "sudo mkdir scripts" para criar uma pasta para os scripts
+2. Digite "sudo nano check_apache" 
+3. Coloque o seguinte código (Certifique-se de mudar o nome do diretorio:
+#!/bin/bash
+
+```shell
+
+systemctl is-active httpd
+status=$?
+
+time=$(date +"%H-%M-%S")
+
+if [ $status -eq 0 ]; then
+  file_name="online.txt"
+  message="O sistema Apache está online"
+else
+  file_name="offline.txt"
+  message="O sistema Apache está offline"
+fi
+
+mkdir -p "/nfs/<seunome>/$time"
+
+echo "$message" > "/nfs/<seunome>/$time/$file_name"
+```
+
+4. Conceda permissão para executar com "sudo chmod 777 check_apache.sh"
+
+
