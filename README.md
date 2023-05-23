@@ -7,23 +7,24 @@ Este trabalho tem como objetivo a criação de uma instância AWS Linux com um s
 16 GB SSD)
 - Elastic IP anexado à instância
 - Liberar seguintes portas de comunicação para acesso público:
- - 22/TCP
- - 111/TCP e UDP
- - 2049/TCP e UDP
- - 80/TCP 
- - 443/TCP
+  - 22/TCP
+  - 111/TCP e UDP
+  - 2049/TCP e UDP
+  - 80/TCP 
+  - 443/TCP
 
 #### Requisitos Linux
 - Configurar o NFS entregue
 - Criar um diretorio dentro do filesystem do NFS
 - Inicializar o apache
 - Criar um script que deve ser executado automaticamente a cada 5 minutos
- - O script deve conter - Data/HORA + nome do serviço + Status + mensagem
+  - O script deve conter - Data/HORA + nome do serviço + Status + mensagem
 personalizada de ONLINE ou offline
- - O script deve gerar 2 arquivos de saida: 1 para o serviço online e 1 para o serviço
+  - O script deve gerar 2 arquivos de saida: 1 para o serviço online e 1 para o serviço
 OFFLINE
 
 ## Instruções passo-a-passo
+
 #### Criação do Key Pair
 1. No Dashboard EC2, entre na aba "Key Pairs" 
 2. Clique em "Create Key Pair"
@@ -32,7 +33,13 @@ OFFLINE
 5. O download de sua chave iniciará automaticamente, tenha certeza de salva-lá em um lugar seguro
 
 #### Criação do security group
-WIP
+1. No Dashboard EC2, entre na aba "Security Groups"
+2. Clique em "Create Security Group"
+3. Nomeie e edite a descrição caso necessário
+4. Em "Inbound rules", edite conforme a imagem:
+![Inbound rules](https://github.com/vitortoniolo/pb_atividade_awslinuxnfs/assets/133904035/777c3b91-d561-4506-87a7-bd4e9c4a5750)
+
+
 #### Criação da Instância
 1. No Dashboard EC2, entre na aba "Instances"
 2. Clique em "Launch Instances"
@@ -49,16 +56,19 @@ WIP
 2. Selecione a mesma região e sua instância (provavelmente us-east-1)
 3. Clique em Allocate
 4. Selecione o IP,  clique em "Actions" e em "Associate Elastic IP"
-5. Seleciona a instância previamente criada
+5. Selecione a instância previamente criada
 
 #### NFS 
-1. Clique connect na instancia ec2
-2. Ao abrir o terminal, digite "sudo yum update"
-3. Use o comando "sudo mkdir nfs/<seunome>" para criar o diretorio nfs
-4. Agora digite "sudo nano /etc/exports" (alternativamente pode usar vim invés de nano, por simplicidade irei usar nano) 
-5. Adicione a seguinte linha ao arquivo: /nfs/<seunome> <ipdamaquina>(rw)
-6. Para inicializar o serviço NFS digite "sudo systemctl start nfs-server"
-7. Para inizializa-lo automaticamente com o sistema digite "sudo systemctl enable nfs-server"
+1. Na aba de EFS, clique em "Create Filesystem"
+2. Nomeie "NFS" e escolhe o VPC padrão
+3. Após criar, selecione o file system e clique em "view details"
+4. Navegue até a aba "Network" e clique em "Manage"
+5. Mude todos os security groups para o mesmo que foi utilizado na instância
+6. Ainda na tela do seu filesystem, clique em "Attach"
+7. Em "Mount via DNS", copie o comando de "Using the NFS client:" , ele irá parecer assim:
+`sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-05118e16cc9f62a18.efs.us-east-1.amazonaws.com:/ efs`
+8. Certifique-se de mudar o diretorio default para o nosso diretorio nfs e execute
+9. Verifique se está instalado corretamente com o df -h
 
 #### Apache
 1. No CMD digite "sudo yum install httpd" para instalar o serviço apache
@@ -68,29 +78,43 @@ WIP
 #### Script
 1. Digite "sudo mkdir scripts" para criar uma pasta para os scripts
 2. Digite "sudo nano check_apache" 
-3. Coloque o seguinte código (Certifique-se de mudar o nome do diretorio:
-#!/bin/bash
+3. Coloque o seguinte código (Certifique-se de mudar o nome do diretorio):
 
 ```shell
+#!/bin/bash
 
-systemctl is-active httpd
+# Defina o nome do serviço a ser verificado
+servico="httpd"  
+
+# Verifica o status do serviço
+systemctl is-active "$servico"
 status=$?
 
-time=$(date +"%H-%M-%S")
+# Obtém a data atual
+data=$(date +"%H:%M_%d-%m-%Y")
 
+# Define a mensagem personalizada
+mensagem_online="O serviço $servico está online! :)"
+mensagem_offline="O serviço $servico está offline :("
+
+# Define o nome do arquivo com base no status
 if [ $status -eq 0 ]; then
-  file_name="online.txt"
-  message="O sistema Apache está online"
+  status_nome="online"
+  mensagem=$mensagem_online
 else
-  file_name="offline.txt"
-  message="O sistema Apache está offline"
+  status_nome="offline"
+  mensagem=$mensagem_offline
 fi
 
-mkdir -p "/nfs/<seunome>/$time"
-
-echo "$message" > "/nfs/<seunome>/$time/$file_name"
+# Cria o diretório e arquivo com as informações
+mkdir -p /nfs/<seunome>/$data
+echo "Data: $data" > "/nfs/<seunome>/$data/$status_nome.txt"
+echo "Status: $mensagem" >> "/nfs/<seunome>/$data/$status_nome.txt"
 ```
 
 4. Conceda permissão para executar com "sudo chmod 777 check_apache.sh"
+5. Digite "sudo crontab -e"
+6. Adicione a seguinte linha:` */5 * * * * /scripts/check_servico.sh`
+7. Caso esteja no VIM, salve apertando esc e em seguida ":w" 
 
-
+ 
