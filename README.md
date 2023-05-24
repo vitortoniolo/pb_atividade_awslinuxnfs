@@ -118,6 +118,11 @@ echo "Status: $mensagem" >> "/nfs/<seunome>/$data/$status_nome.txt"
 6. Adicione a seguinte linha:` */5 * * * * /scripts/check_servico.sh`
 7. Caso esteja no VIM, salve apertando esc e em seguida ":w" 
 
+#### Opcional: Conectar-se a instância via SSH no Windows ou Linux
+1. Abrindo seu cmd, localize sua chave privada
+2. Digite o seguinte comando: `ssh -i "<nomedachave>.pem" ec2-user@<dns ipv4 publico da sua instância>`
+
+
 ## Finalização
 Agora sua instância está com o apache instalado, com o script rodando e enviando os logs para seu diretório NFS. O script está disponível no repositório para download.
 
