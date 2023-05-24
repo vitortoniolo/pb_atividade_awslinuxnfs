@@ -1,5 +1,5 @@
 # Sistema NFS Linux via AWS
-Este trabalho tem como objetivo a criação de uma instância AWS Linux com um servidor apache. Após isso, deve ser feito um script a fim de validar o funcionamento do serviço apache automaticamente.
+Este trabalho tem como objetivo a criação de uma instância AWS Linux com um servidor apache e montagem de um diretório NFS via um Elastic IP. Após isso, deve ser feito um script a fim de validar o funcionamento do serviço apache automaticamente e enviar os resultados para o diretório NFS.
 
 #### Requisitos AWS
 - Chave pública para o acesso à instância
@@ -37,8 +37,6 @@ OFFLINE
 2. Clique em "Create Security Group"
 3. Nomeie e edite a descrição caso necessário
 4. Em "Inbound rules", edite conforme a imagem:
-![Inbound rules](https://github.com/vitortoniolo/pb_atividade_awslinuxnfs/assets/133904035/777c3b91-d561-4506-87a7-bd4e9c4a5750)
-
 
 #### Criação da Instância
 1. No Dashboard EC2, entre na aba "Instances"
@@ -69,6 +67,9 @@ OFFLINE
 `sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-05118e16cc9f62a18.efs.us-east-1.amazonaws.com:/ efs`
 8. Certifique-se de mudar o diretorio default para o nosso diretorio nfs e execute
 9. Verifique se está instalado corretamente com o df -h
+10. Para automatizar a instalação do NFS, abra o fstab com o comando "sudo nano /etc/fstab"
+11. Adicione a seguinte linha: `fs-05118e16cc9f62a18.efs.us-east-1.amazonaws.com:/  /nfs  nfs defaults 0 0`
+12. A montagem deve ocorrer automaticamente ao reinicializar o sistema. Caso não ocorra, você pode executar "sudo mount -a" para executar o fstab manualmente
 
 #### Apache
 1. No CMD digite "sudo yum install httpd" para instalar o serviço apache
@@ -112,9 +113,14 @@ echo "Data: $data" > "/nfs/<seunome>/$data/$status_nome.txt"
 echo "Status: $mensagem" >> "/nfs/<seunome>/$data/$status_nome.txt"
 ```
 
-4. Conceda permissão para executar com "sudo chmod 777 check_apache.sh"
+4. Conceda permissão para executar com "sudo chmod 777 check_servico.sh". Você pode testar o funcionamento com "sudo ./check_servico.sh
 5. Digite "sudo crontab -e"
 6. Adicione a seguinte linha:` */5 * * * * /scripts/check_servico.sh`
 7. Caso esteja no VIM, salve apertando esc e em seguida ":w" 
+
+## Finalização
+Agora sua instância está com o apache instalado, com o script rodando e enviando os logs para seu diretório NFS. O script está disponível no repositório para download.
+
+![compass-uol](https://github.com/vitortoniolo/pb_atividade_awslinuxnfs/assets/133904035/a98c23e1-6502-4427-873b-71e8d32ae9bd)
 
  
